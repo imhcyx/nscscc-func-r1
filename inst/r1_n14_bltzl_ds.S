@@ -1,0 +1,97 @@
+#include <asm.h>
+#include <regdef.h>
+#include <cpu_cde.h>
+
+#define TEST_BLTZL_DS(op, dest, ...) \
+    li a0, 0x80000000; \
+    li a1, 0x7fffffff; \
+    bltzl a1, 1000f; \
+    op  dest , ##__VA_ARGS__; \
+    op  s6 , ##__VA_ARGS__; \
+    bne dest, s6, inst_error; \
+    nop; \
+    bltzl a0, 2000f; \
+    op  s7 , ##__VA_ARGS__; \
+1000: ; \
+    b   inst_error; \
+    nop;            \
+2000: ; \
+    bne s7, s6, inst_error; \
+    nop
+
+#define TEST_BLTZL_DS_MD(...) \
+    li a0, 0x80000000; \
+    li a1, 0x7fffffff; \
+    li v0, 0; \
+    li v1, 0; \
+    bltzl a1, 1000f; \
+    ##__VA_ARGS__; \
+    mflo v0; \
+    mtlo a0; \
+    ##__VA_ARGS__; \
+    mflo s6; \
+    bne v0, s6, inst_error; \
+    nop; \
+    mtlo a0; \
+    bltzl a0, 2000f; \
+    ##__VA_ARGS__; \
+1000: ; \
+    b   inst_error; \
+    nop;            \
+2000: ; \
+    mflo v1; \
+    bne v1, s6, inst_error; \
+    nop
+
+LEAF(bltzl_ds_test)
+    .set noreorder
+    addiu s0, s0 ,1
+    li  s2, 0x00
+###test inst
+    TEST_BLTZL_DS(lui,   t0,0x800d)
+    TEST_BLTZL_DS(addiu, t1, t0, 0x8123)
+    TEST_BLTZL_DS(sw,    t1, -0x7120(t0))
+    TEST_BLTZL_DS(lw,    t2, -0x7120(t0))
+    TEST_BLTZL_DS(addu,  t3, t1, t2)
+    TEST_BLTZL_DS(or,    t4, s1, s2)
+    TEST_BLTZL_DS(slt,   t5, s2, s3)
+    TEST_BLTZL_DS(slti,  t6, s2, 0x8011)
+    TEST_BLTZL_DS(sltiu, t7, s2, 0x8011)
+    TEST_BLTZL_DS(sltu,  t8, s2, s3)
+    TEST_BLTZL_DS(sll,   t1, s2, 0x11)
+    TEST_BLTZL_DS(add,   t2, t0, s0)
+    TEST_BLTZL_DS(addi,  t3, s0, 0x8002)
+    TEST_BLTZL_DS(sub,   t4, t0, s0)
+    TEST_BLTZL_DS(subu,  t5, t0, s0)
+    TEST_BLTZL_DS(and,   t6, t0, s0)
+    TEST_BLTZL_DS(andi,  t7, s0, 0x8ff2)
+    TEST_BLTZL_DS(nor,   t8, t0, s0)
+    TEST_BLTZL_DS(ori,   t1, s0, 0x8ff2)
+    TEST_BLTZL_DS(xor,   t2, t0, s0)
+    TEST_BLTZL_DS(xori,  t3, s0, 0x8ff2)
+    TEST_BLTZL_DS(sllv,  t4, t0, s0)
+    TEST_BLTZL_DS(sra,   t5, s0, 0x8)
+    TEST_BLTZL_DS(srav,  t6, t0, s0)
+    TEST_BLTZL_DS(srl,   t7, s0, 0x8)
+    TEST_BLTZL_DS(srlv,  t8, t0, s0)
+    lui t0, 0x8000
+    li  t1, 0x00008000
+    TEST_BLTZL_DS_MD(div    zero, t0, t1)
+    TEST_BLTZL_DS_MD(divu   zero, t0, t1)
+    TEST_BLTZL_DS_MD(mult   t0, t1)
+    TEST_BLTZL_DS_MD(multu  t0, t1)
+    TEST_BLTZL_DS(mfhi, t7)
+    TEST_BLTZL_DS(mflo, t6)
+###detect exception
+    bne s2, zero, inst_error
+    nop
+###score ++
+    addiu s3, s3, 1
+###output (s0<<24)|s3
+inst_error:  
+    sll t1, s0, 24
+    or t0, t1, s3 
+    sw t0, 0(s1)
+    jr ra
+    nop
+END(bltzl_ds_test)
