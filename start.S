@@ -3,9 +3,10 @@
 #include <cpu_cde.h>
 
 #define TEST_LIKELY 0
-#define TEST_TRAP   1
+#define TEST_TRAP   0
+#define TEST_MOVZN  1
 
-#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12)
+#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2)
 
 
 ##s0, number
@@ -500,6 +501,18 @@ inst_test:
     nop
     #36
     jal tnei_ex_test
+    nop
+    jal wait_1s
+    nop
+#endif
+#if TEST_MOVZN
+    #37
+    jal movz_test
+    nop
+    jal wait_1s
+    nop
+    #38
+    jal movn_test
     nop
     jal wait_1s
     nop
