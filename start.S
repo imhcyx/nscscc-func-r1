@@ -2,7 +2,10 @@
 #include <regdef.h>
 #include <cpu_cde.h>
 
-#define TEST_NUM 89
+#define TEST_LIKELY 0
+#define TEST_TRAP   1
+
+#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12)
 
 
 ##s0, number
@@ -92,6 +95,9 @@ common_exception_handler:
     nop
     li  k0, 0x08 # int
     beq k1, k0, int_ex
+    nop
+    li  k0, 0x09 # trap
+    beq k1, k0, trap_ex
     nop
     j test_end
     nop
@@ -254,6 +260,27 @@ int_ex:
     b ex_ret
     nop
 
+trap_ex:
+    addu s2, zero, zero 
+    mfc0 k0, c0_epc
+    bne  k0, s4, ex_finish
+    mfc0 k0, c0_cause
+    andi k0, k0, 0x7c # 6..2 exc code
+    li   k1, 0x0d<<2
+    bne  k0, k1, ex_finish
+    nop
+    mfc0 k0, c0_status
+    andi k0, k0, 0x02 # exl
+    li k1, 0x02 # exl = 1
+    bne k0, k1, ex_finish
+    nop
+    mfc0 k1,c0_epc
+    addiu k1,k1,0x8
+    mtc0  k1,c0_epc # skip 2 more instructions
+    lui s2, 0x9
+    b ex_finish
+    nop
+
 ex_finish:
     mfc0 k0,c0_cause
     lui k1,0x8000
@@ -293,6 +320,7 @@ locate:
     lui s0, 0          ## initial run number
 
 inst_test:
+#if TEST_LIKELY
     #1
     jal beql_test
     nop
@@ -413,7 +441,69 @@ inst_test:
     nop
     jal wait_1s
     nop
-    
+#endif
+#if TEST_TRAP
+    #25
+    jal tge_ex_test
+    nop
+    jal wait_1s
+    nop
+    #26
+    jal tgeu_ex_test
+    nop
+    jal wait_1s
+    nop
+    #27
+    jal tlt_ex_test
+    nop
+    jal wait_1s
+    nop
+    #28
+    jal tltu_ex_test
+    nop
+    jal wait_1s
+    nop
+    #29
+    jal teq_ex_test
+    nop
+    jal wait_1s
+    nop
+    #30
+    jal tne_ex_test
+    nop
+    jal wait_1s
+    nop
+    #31
+    jal tgei_ex_test
+    nop
+    jal wait_1s
+    nop
+    #32
+    jal tgeiu_ex_test
+    nop
+    jal wait_1s
+    nop
+    #33
+    jal tlti_ex_test
+    nop
+    jal wait_1s
+    nop
+    #34
+    jal tltiu_ex_test
+    nop
+    jal wait_1s
+    nop
+    #35
+    jal teqi_ex_test
+    nop
+    jal wait_1s
+    nop
+    #36
+    jal tnei_ex_test
+    nop
+    jal wait_1s
+    nop
+#endif
 ###check io access
     LI  (a0, IO_SIMU_ADDR)
     LI  (t0, 0x1234)
