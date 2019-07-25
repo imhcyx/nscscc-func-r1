@@ -4,9 +4,10 @@
 
 #define TEST_LIKELY 0
 #define TEST_TRAP   0
-#define TEST_MOVZN  1
+#define TEST_MOVZN  0
+#define TEST_CLZO   1
 
-#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2)
+#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2)
 
 
 ##s0, number
@@ -513,6 +514,18 @@ inst_test:
     nop
     #38
     jal movn_test
+    nop
+    jal wait_1s
+    nop
+#endif
+#if TEST_CLZO
+    #39
+    jal clz_test
+    nop
+    jal wait_1s
+    nop
+    #40
+    jal clo_test
     nop
     jal wait_1s
     nop
