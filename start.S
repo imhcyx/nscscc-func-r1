@@ -6,9 +6,10 @@
 #define TEST_TRAP   0
 #define TEST_MOVZN  0
 #define TEST_CLZO   0
-#define TEST_MUL    1
+#define TEST_MUL    0
+#define TEST_LLSC   1
 
-#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5)
+#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1)
 
 
 ##s0, number
@@ -62,7 +63,7 @@ test_finish:
  */
 
 .org 0x200
-    j test_end
+    j io_err
     nop
 
 .org 0x380
@@ -102,7 +103,7 @@ common_exception_handler:
     li  k0, 0x09 # trap
     beq k1, k0, trap_ex
     nop
-    j test_end
+    j io_err
     nop
 
 syscall_ex:
@@ -554,6 +555,13 @@ inst_test:
     nop
     #45
     jal msubu_test
+    nop
+    jal wait_1s
+    nop
+#endif
+#if TEST_LLSC
+    #46
+    jal ll_sc_test
     nop
     jal wait_1s
     nop
