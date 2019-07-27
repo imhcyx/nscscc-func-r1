@@ -8,9 +8,10 @@
 #define TEST_CLZO   0
 #define TEST_MUL    0
 #define TEST_LLSC   0
-#define TEST_VEC    1
+#define TEST_VEC    0
+#define TEST_USER   1
 
-#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1+TEST_VEC*1)
+#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1+TEST_VEC*1+TEST_USER*2)
 
 
 ##s0, number
@@ -145,6 +146,11 @@ handler_400:
 
 common_exception_handler:
 1:  
+    # escalate privilege to kernel mode
+    mfc0 k0, c0_status
+    li k1, ~(0x3<<3) # KSU=00
+    and k0, k1
+    mtc0 k0, c0_status
     mfhi k0
     mflo k1
     li  k0, 0x800d0000
@@ -175,6 +181,9 @@ common_exception_handler:
     nop
     li  k0, 0x09 # trap
     beq k1, k0, trap_ex
+    nop
+    li  k0, 0x0a # cop unavail
+    beq k1, k0, cpu_ex
     nop
     li  k0, -1 # vector test
     bne k1, k0, io_err
@@ -368,6 +377,24 @@ trap_ex:
     addiu k1,k1,0x8
     mtc0  k1,c0_epc # skip 2 more instructions
     lui s2, 0x9
+    b ex_finish
+    nop
+
+cpu_ex:
+    addu s2, zero, zero 
+    mfc0 k0, c0_epc
+    bne  k0, s4, ex_finish
+    mfc0 k0, c0_cause
+    andi k0, k0, 0x7c # 6..2 exc code
+    li   k1, 0x0b<<2
+    bne  k0, k1, ex_finish
+    nop
+    mfc0 k0, c0_status
+    andi k0, k0, 0x02 # exl
+    li k1, 0x02 # exl = 1
+    bne k0, k1, ex_finish
+    nop
+    lui s2, 0xa
     b ex_finish
     nop
 
@@ -655,6 +682,18 @@ inst_test:
 #if TEST_VEC
     #47
     jal ex_vec_test
+    nop
+    jal wait_1s
+    nop
+#endif
+#if TEST_USER
+    #48
+    jal cpu_ex_test
+    nop
+    jal wait_1s
+    nop
+    #49
+    jal krnl_as_test
     nop
     jal wait_1s
     nop
