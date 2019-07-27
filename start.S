@@ -7,9 +7,10 @@
 #define TEST_MOVZN  0
 #define TEST_CLZO   0
 #define TEST_MUL    0
-#define TEST_LLSC   1
+#define TEST_LLSC   0
+#define TEST_VEC    1
 
-#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1)
+#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1+TEST_VEC*1)
 
 
 ##s0, number
@@ -24,10 +25,8 @@
 _start:
 start:
     disable_trace_cmp_s
-    li    t0, 0xffffffff
-    addiu t0, zero, 0xffff
-	b	locate
-	nop
+    b reset_handler
+    nop
 
 ##avoid "j locate" not taken
     lui   t0, 0x8000
@@ -62,13 +61,87 @@ test_finish:
  *  exception handle
  */
 
+.org 0x180
+    b handler_180
+    nop
+
 .org 0x200
-    j io_err
+    b handler_200
     nop
 
 .org 0x380
     b common_exception_handler
     nop
+
+.org 0x400
+    b handler_400
+    nop
+
+reset_handler:
+    ## check tlb refill bev exl
+    mfc0 k0, c0_status
+    andi k0, 1<<1 # exl
+    beqz k0, go_reset
+    nop
+    move k0, ra
+    bal 1f
+    nop
+1:  move s7, ra
+    move ra, k0
+    li k0, 0xfffff000
+    and s7, k0
+    li k0, 0x000
+    or s7, k0
+    mtc0 s5, c0_epc
+    mtc0 zero, c0_cause
+    eret
+go_reset:
+    li    t0, 0xffffffff
+    addiu t0, zero, 0xffff
+    b	locate
+    nop
+
+handler_180:
+    move k0, ra
+    bal 1f
+    nop
+1:  move s7, ra
+    move ra, k0
+    li k0, 0xfffff000
+    and s7, k0
+    li k0, 0x180
+    or s7, k0
+    mtc0 s5, c0_epc
+    mtc0 zero, c0_cause
+    eret
+
+handler_200:
+    move k0, ra
+    bal 1f
+    nop
+1:  move s7, ra
+    move ra, k0
+    li k0, 0xfffff000
+    and s7, k0
+    li k0, 0x200
+    or s7, k0
+    mtc0 s5, c0_epc
+    mtc0 zero, c0_cause
+    eret
+
+handler_400:
+    move k0, ra
+    bal 1f
+    nop
+1:  move s7, ra
+    move ra, k0
+    li k0, 0xfffff000
+    and s7, k0
+    li k0, 0x400
+    or s7, k0
+    mtc0 s5, c0_epc
+    mtc0 zero, c0_cause
+    eret
 
 common_exception_handler:
 1:  
@@ -103,8 +176,21 @@ common_exception_handler:
     li  k0, 0x09 # trap
     beq k1, k0, trap_ex
     nop
-    j io_err
+    li  k0, -1 # vector test
+    bne k1, k0, io_err
     nop
+    move k0, ra
+    bal 1f
+    nop
+1:  move s7, ra
+    move ra, k0
+    li k0, 0xfffff000
+    and s7, k0
+    li k0, 0x380
+    or s7, k0
+    mtc0 s5, c0_epc
+    mtc0 zero, c0_cause
+    eret
 
 syscall_ex:
     addu  s2, zero, zero
@@ -562,6 +648,13 @@ inst_test:
 #if TEST_LLSC
     #46
     jal ll_sc_test
+    nop
+    jal wait_1s
+    nop
+#endif
+#if TEST_VEC
+    #47
+    jal ex_vec_test
     nop
     jal wait_1s
     nop
