@@ -2,13 +2,13 @@
 #include <regdef.h>
 #include <cpu_cde.h>
 
-#define TEST_LIKELY 0
-#define TEST_TRAP   0
-#define TEST_MOVZN  0
-#define TEST_CLZO   0
-#define TEST_MUL    0
-#define TEST_LLSC   0
-#define TEST_VEC    0
+#define TEST_LIKELY 1
+#define TEST_TRAP   1
+#define TEST_MOVZN  1
+#define TEST_CLZO   1
+#define TEST_MUL    1
+#define TEST_LLSC   1
+#define TEST_VEC    1
 #define TEST_USER   1
 
 #define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1+TEST_VEC*1+TEST_USER*2)
