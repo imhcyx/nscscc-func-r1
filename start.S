@@ -10,8 +10,9 @@
 #define TEST_LLSC   1
 #define TEST_VEC    1
 #define TEST_USER   1
+#define TEST_CACHE  1
 
-#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1+TEST_VEC*1+TEST_USER*2)
+#define TEST_NUM (TEST_LIKELY*24+TEST_TRAP*12+TEST_MOVZN*2+TEST_CLZO*2+TEST_MUL*5+TEST_LLSC*1+TEST_VEC*1+TEST_USER*2+TEST_CACHE*1)
 
 
 ##s0, number
@@ -694,6 +695,13 @@ inst_test:
     nop
     #49
     jal krnl_as_test
+    nop
+    jal wait_1s
+    nop
+#endif
+#if TEST_CACHE
+    #50
+    jal cache_test
     nop
     jal wait_1s
     nop
