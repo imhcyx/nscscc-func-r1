@@ -4,8 +4,9 @@
 
 #define TEST_BEQL_DS(op, dest, ...) \
     addiu s5, zero, 0x1; \
-    beql s5, zero, 1000f; \
     op  dest , ##__VA_ARGS__; \
+    beql s5, zero, 1000f; \
+    addiu dest, zero, 0x1; \
     op  s6 , ##__VA_ARGS__; \
     bne dest, s6, inst_error; \
     nop; \

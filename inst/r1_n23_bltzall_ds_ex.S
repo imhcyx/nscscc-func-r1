@@ -22,11 +22,11 @@ LEAF(bltzall_ds_ex_test)
     syscall
     bne s2, s7, inst_error
     nop
-    li    s2, 0x01
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     syscall
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
  ##2: break
     li    s2, 0x02
@@ -37,11 +37,11 @@ LEAF(bltzall_ds_ex_test)
     break
     bne s2, s7, inst_error
     nop
-    li    s2, 0x02
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     break
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
  ##3: ov
     li    s2, 0x03
@@ -54,12 +54,12 @@ LEAF(bltzall_ds_ex_test)
     add   s7, a0, a1
     bne s2, s7, inst_error
     nop
-    li    s2, 0x03
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     add   s7, a0, a1
     sw    s7, 0(t0)
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
     li    s2, 0x03
     sw    s2, 0(t0)
@@ -69,11 +69,11 @@ LEAF(bltzall_ds_ex_test)
     addi  s7, a0, 0x6512
     bne s2, s7, inst_error
     nop
-    li    s2, 0x03
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     addi  s7, a0, 0x6512
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
     li    s2, 0x03
     la    s4, 1f
@@ -83,11 +83,11 @@ LEAF(bltzall_ds_ex_test)
     sub   s7, a0, a1
     bne s2, s7, inst_error
     nop
-    li    s2, 0x03
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     sub   s7, a0, a1
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
  ##4: load adel
     li    s2, 0x04
@@ -98,11 +98,11 @@ LEAF(bltzall_ds_ex_test)
     lw    s7, 2(t0)
     bne s2, s7, inst_error
     nop
-    li    s2, 0x04
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     lw    s7, 2(t0)
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
     li    s2, 0x04
     la    s4, 1f
@@ -111,22 +111,22 @@ LEAF(bltzall_ds_ex_test)
     divu zero, s7, s2
     bne s2, s7, inst_error
     nop
-    li    s2, 0x04
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     lh    s7, 1(t0)
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
     la    s4, 1f
 1:  bltzall  t0, inst_error
     lhu   s7, 3(t0)
     bne s2, s7, inst_error
     nop
-    li    s2, 0x04
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     lhu   s7, 3(t0)
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
  ##5: store ades
     li    s2, 0x05
@@ -137,11 +137,11 @@ LEAF(bltzall_ds_ex_test)
     sw    s7, 2(t0)
     bne s2, s7, inst_error
     nop
-    li    s2, 0x05
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     sw    s7, 2(t0)
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
     li    s2, 0x05
     la    s4, 1f
@@ -149,11 +149,11 @@ LEAF(bltzall_ds_ex_test)
     sh    s7, 1(t0)
     bne s2, s7, inst_error
     nop
-    li    s2, 0x05
+    move s2, zero
     la    s4, 2f
 2:  bltzall  s2, inst_error
     sh    s7, 1(t0)
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
  ##6: fetch adel:no
  ##7: reserved instruction
@@ -166,12 +166,12 @@ LEAF(bltzall_ds_ex_test)
     mult  s7, s2
     bne s2, s7, inst_error
     nop
-    li    s2, 0x07
+    move s2, zero
     la    s4, 2f
     mult  s7, s2
 2:  bltzall  s2, inst_error
     .word 0xec1ba960
-    bne s2, s7, inst_error
+    beq s2, s7, inst_error
     nop
 ###score ++
     addiu s3, s3, 1

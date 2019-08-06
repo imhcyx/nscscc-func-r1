@@ -6,8 +6,9 @@
     addu s7, zero, $31; \
     li a0, 0x80000000; \
     li a1, 0x7fffffff; \
-    bltzall a1, 1000f; \
     op  dest , ##__VA_ARGS__; \
+    bltzall a1, 1000f; \
+    addiu dest, zero, 0x1; \
     op  s6 , ##__VA_ARGS__; \
     bne dest, s6, inst_error; \
     nop; \
@@ -27,7 +28,6 @@
     li a1, 0x7fffffff; \
     li v0, 0; \
     li v1, 0; \
-    bltzall a1, 1000f; \
     ##__VA_ARGS__; \
     mflo v0; \
     mtlo a0; \
